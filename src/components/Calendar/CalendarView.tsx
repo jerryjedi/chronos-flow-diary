@@ -1,25 +1,36 @@
 
 import React, { useState } from 'react';
 import { format, addMonths, subMonths, parseISO, setMonth, setYear } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Event } from '@/data/mockData';
+import { Event, mockCategories } from '@/data/mockData';
 import { getCalendarDays, getEventsForDay } from '@/utils/calendarUtils';
 import EventModal from './EventModal';
+import EventForm from './EventForm';
+import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface CalendarViewProps {
   events: Event[];
   onEventClick?: (event: Event) => void;
+  onEventAdd?: (event: Event) => void;
+  onEventUpdate?: (event: Event) => void;
+  onEventDelete?: (id: string) => void;
 }
 
 const CalendarView: React.FC<CalendarViewProps> = ({ 
   events,
-  onEventClick
+  onEventClick,
+  onEventAdd,
+  onEventUpdate,
+  onEventDelete
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formDate, setFormDate] = useState<Date | undefined>(undefined);
+  const [editingEvent, setEditingEvent] = useState<Event | undefined>(undefined);
   
   const calendarDays = getCalendarDays(currentDate);
   
@@ -50,6 +61,40 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedEvent(null);
+  };
+
+  const handleAddEvent = (date?: Date) => {
+    setFormDate(date);
+    setEditingEvent(undefined);
+    setIsFormOpen(true);
+  };
+
+  const handleEditEvent = () => {
+    if (!selectedEvent) return;
+    setEditingEvent(selectedEvent);
+    setIsModalOpen(false);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveEvent = (event: Event) => {
+    if (editingEvent) {
+      if (onEventUpdate) {
+        onEventUpdate(event);
+      }
+      toast.success('Event updated successfully');
+    } else {
+      if (onEventAdd) {
+        onEventAdd(event);
+      }
+      toast.success('Event created successfully');
+    }
+  };
+
+  const handleDeleteEvent = (id: string) => {
+    if (onEventDelete) {
+      onEventDelete(id);
+      toast.success('Event deleted successfully');
+    }
   };
 
   // Generate year options (current year ± 10 years)
@@ -96,6 +141,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           <Button variant="outline" size="sm" onClick={handleNextMonth}>
             <ChevronRight className="h-4 w-4" />
           </Button>
+          <Button size="sm" onClick={() => handleAddEvent()}>
+            <Plus className="h-4 w-4 mr-1" /> Event
+          </Button>
         </div>
       </div>
       
@@ -116,6 +164,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             <div 
               key={index} 
               className={`calendar-day min-h-24 ${!isCurrentMonth ? 'text-muted-foreground bg-muted/30' : ''}`}
+              onClick={() => handleAddEvent(day)}
             >
               <div className="calendar-day-header text-right">
                 {format(day, 'd')}
@@ -126,7 +175,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                     key={event.id}
                     className="calendar-event"
                     style={{ backgroundColor: event.color || '#9b87f5' }}
-                    onClick={() => handleEventClick(event)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEventClick(event);
+                    }}
                   >
                     {event.startTime && (
                       <span className="font-medium">{event.startTime}</span>
@@ -150,8 +202,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           event={selectedEvent}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
+          onEdit={handleEditEvent}
         />
       )}
+
+      <EventForm 
+        event={editingEvent} 
+        date={formDate}
+        isOpen={isFormOpen} 
+        onClose={() => setIsFormOpen(false)}
+        onSave={handleSaveEvent}
+        onDelete={handleDeleteEvent}
+        categories={mockCategories}
+      />
     </div>
   );
 };

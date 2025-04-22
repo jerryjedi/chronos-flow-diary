@@ -1,5 +1,5 @@
 
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addDays, isSameDay, parseISO } from 'date-fns';
 import { Event, Task } from '../data/mockData';
 
 // Get all days in a month for the calendar grid
@@ -80,7 +80,16 @@ export const parseICSFile = (content: string): Event[] => {
           currentEvent.endTime = `${hour}:${minute}`;
         }
       } else if (key.startsWith('DESCRIPTION')) {
-        currentEvent.description = value;
+        // Clean up HTML tags from description
+        const cleanDescription = value
+          .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+          .replace(/&nbsp;/g, ' ') // Replace &nbsp; with spaces
+          .replace(/&lt;/g, '<') // Replace &lt; with <
+          .replace(/&gt;/g, '>') // Replace &gt; with >
+          .replace(/&quot;/g, '"') // Replace &quot; with "
+          .replace(/&amp;/g, '&'); // Replace &amp; with &
+        
+        currentEvent.description = cleanDescription;
       }
     }
   }

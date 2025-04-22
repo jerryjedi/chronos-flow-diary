@@ -28,6 +28,22 @@ const Index = () => {
     setEvents(prev => [...prev, ...importedEvents]);
   };
 
+  const handleAddEvent = (newEvent: Event) => {
+    setEvents(prev => [...prev, newEvent]);
+  };
+
+  const handleUpdateEvent = (updatedEvent: Event) => {
+    setEvents(prev => 
+      prev.map(event => 
+        event.id === updatedEvent.id ? updatedEvent : event
+      )
+    );
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    setEvents(prev => prev.filter(event => event.id !== eventId));
+  };
+
   return (
     <Layout>
       <div className="flex justify-between items-center mb-6">
@@ -41,7 +57,12 @@ const Index = () => {
             <CardTitle>Calendar</CardTitle>
           </CardHeader>
           <CardContent>
-            <CalendarView events={events} />
+            <CalendarView 
+              events={events}
+              onEventAdd={handleAddEvent}
+              onEventUpdate={handleUpdateEvent}
+              onEventDelete={handleDeleteEvent}
+            />
           </CardContent>
         </Card>
         

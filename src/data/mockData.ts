@@ -1,4 +1,3 @@
-
 export interface Event {
   id: string;
   title: string;
@@ -8,6 +7,7 @@ export interface Event {
   description?: string;
   category?: string;
   color?: string;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 export interface Task {
@@ -42,7 +42,8 @@ export const mockEvents: Event[] = [
     endTime: '11:00',
     description: 'Weekly team sync meeting',
     category: 'work',
-    color: '#9b87f5'
+    color: '#9b87f5',
+    priority: 'medium'
   },
   {
     id: '2',
@@ -52,7 +53,8 @@ export const mockEvents: Event[] = [
     endTime: '13:30',
     description: 'Lunch at the Italian restaurant',
     category: 'personal',
-    color: '#4ADE80'
+    color: '#4ADE80',
+    priority: 'low'
   },
   {
     id: '3',
@@ -61,7 +63,8 @@ export const mockEvents: Event[] = [
     startTime: '17:00',
     description: 'Submit final project files',
     category: 'work',
-    color: '#9b87f5'
+    color: '#9b87f5',
+    priority: 'high'
   },
   {
     id: '4',
@@ -70,7 +73,8 @@ export const mockEvents: Event[] = [
     startTime: '07:00',
     endTime: '08:00',
     category: 'health',
-    color: '#FACC15'
+    color: '#FACC15',
+    priority: 'medium'
   },
   {
     id: '5',
@@ -80,7 +84,8 @@ export const mockEvents: Event[] = [
     endTime: '15:00',
     description: 'Annual checkup',
     category: 'health',
-    color: '#FACC15'
+    color: '#FACC15',
+    priority: 'high'
   },
 ];
 
