@@ -255,17 +255,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         })}
       </div>
       
+      {/* Always render the EventModal when using internal event handling */}
       {!onEventClick && (
-        <>
-          {/* Event Modal - Only show when isModalOpen is true */}
-          <EventModal 
-            event={selectedEvent}
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            onEdit={handleEditEvent}
-            onDelete={handleDeleteEvent}
-          />
-        </>
+        <EventModal 
+          event={selectedEvent}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onEdit={handleEditEvent}
+          onDelete={handleDeleteEvent}
+        />
       )}
 
       {/* Event Form - Only show when isFormOpen is true */}

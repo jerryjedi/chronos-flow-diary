@@ -30,6 +30,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
         date: task.date,
         description: task.description,
         category: task.category,
+        color: task.color,
         priority: task.priority
       };
       

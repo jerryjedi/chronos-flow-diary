@@ -4,10 +4,12 @@ import Layout from '@/components/Layout';
 import CalendarView from '@/components/Calendar/CalendarView';
 import TaskList from '@/components/Tasks/TaskList';
 import ImportCalendar from '@/components/FileImport/ImportCalendar';
-import { mockEvents, mockTasks, Event, Task } from '@/data/mockData';
+import { mockEvents, mockTasks, mockCategories, Event, Task } from '@/data/mockData';
 import { getTasksForDay } from '@/utils/calendarUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import EventModal from '@/components/Calendar/EventModal';
+import EventForm from '@/components/Calendar/EventForm';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [currentDate] = useState(new Date());
@@ -15,6 +17,7 @@ const Index = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   
   // Get tasks for today
   const todayTasks = getTasksForDay(tasks, currentDate);
@@ -41,10 +44,12 @@ const Index = () => {
         event.id === updatedEvent.id ? updatedEvent : event
       )
     );
+    toast.success('Event updated successfully');
   };
 
   const handleDeleteEvent = (eventId: string) => {
     setEvents(prev => prev.filter(event => event.id !== eventId));
+    toast.success('Event deleted successfully');
   };
 
   const handleEventClick = (event: Event) => {
@@ -57,7 +62,22 @@ const Index = () => {
     setIsModalOpen(false);
     // Clear selected event after modal is closed
     setTimeout(() => {
-      setSelectedEvent(null);
+      if (!isFormOpen) {
+        setSelectedEvent(null);
+      }
+    }, 300);
+  };
+  
+  const handleEditEvent = () => {
+    console.log("Edit event triggered in Index view", selectedEvent);
+    if (!selectedEvent) return;
+    
+    // Close the modal first
+    setIsModalOpen(false);
+    
+    // Add delay to ensure the first modal is closed before opening the form
+    setTimeout(() => {
+      setIsFormOpen(true);
     }, 300);
   };
 
@@ -99,13 +119,32 @@ const Index = () => {
         </Card>
       </div>
 
-      {/* Add Event Modal for handling task-related events */}
+      {/* Event Modal with edit and delete functionality */}
       <EventModal 
         event={selectedEvent}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        // No edit/delete as this is just for viewing
+        onEdit={handleEditEvent}
+        onDelete={handleDeleteEvent}
       />
+
+      {/* Event Form for editing events */}
+      {selectedEvent && (
+        <EventForm 
+          event={selectedEvent} 
+          isOpen={isFormOpen}
+          onClose={() => {
+            setIsFormOpen(false);
+            // Clear selected event after form is closed
+            setTimeout(() => {
+              setSelectedEvent(null);
+            }, 300);
+          }}
+          onSave={handleUpdateEvent}
+          onDelete={handleDeleteEvent}
+          categories={mockCategories}
+        />
+      )}
     </Layout>
   );
 };
