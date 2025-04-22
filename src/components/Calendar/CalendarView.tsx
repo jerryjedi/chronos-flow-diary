@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { format, addMonths, subMonths, parseISO } from 'date-fns';
+import { format, addMonths, subMonths, parseISO, setMonth, setYear } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/data/mockData';
 import { getCalendarDays, getEventsForDay } from '@/utils/calendarUtils';
 import EventModal from './EventModal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface CalendarViewProps {
   events: Event[];
@@ -29,6 +30,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const handleNextMonth = () => {
     setCurrentDate(addMonths(currentDate, 1));
   };
+
+  const handleMonthChange = (month: string) => {
+    setCurrentDate(setMonth(currentDate, parseInt(month)));
+  };
+
+  const handleYearChange = (year: string) => {
+    setCurrentDate(setYear(currentDate, parseInt(year)));
+  };
   
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
@@ -43,10 +52,40 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     setSelectedEvent(null);
   };
 
+  // Generate year options (current year ± 10 years)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">{format(currentDate, 'MMMM yyyy')}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">{format(currentDate, 'MMMM yyyy')}</h2>
+          <Select value={currentDate.getMonth().toString()} onValueChange={handleMonthChange}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 12 }, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>
+                  {format(new Date(2024, i, 1), 'MMMM')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={currentDate.getFullYear().toString()} onValueChange={handleYearChange}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map(year => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex space-x-2">
           <Button variant="outline" size="sm" onClick={handlePrevMonth}>
             <ChevronLeft className="h-4 w-4" />

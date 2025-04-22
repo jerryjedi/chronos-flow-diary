@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Calendar, ListTodo, Tags, Clock } from 'lucide-react';
+import { Calendar, ListTodo, Tags } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { 
   Sidebar as ShadcnSidebar, 
@@ -46,15 +46,6 @@ const Sidebar = () => {
                 <Link to="/categories">
                   <Tags className="h-4 w-4" />
                   <span>Categories</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild className="gap-2">
-                <Link to="/history">
-                  <Clock className="h-4 w-4" />
-                  <span>History</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
