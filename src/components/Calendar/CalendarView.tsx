@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { format, addMonths, subMonths, parseISO, setMonth, setYear } from 'date-fns';
+import React, { useState, useEffect } from 'react';
+import { format, addMonths, subMonths, setMonth, setYear } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Event, mockCategories } from '@/data/mockData';
@@ -32,6 +32,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const [formDate, setFormDate] = useState<Date | undefined>(undefined);
   const [editingEvent, setEditingEvent] = useState<Event | undefined>(undefined);
   
+  // Clear states when events array changes
+  useEffect(() => {
+    if (!isModalOpen && !isFormOpen) {
+      setSelectedEvent(null);
+      setEditingEvent(undefined);
+    }
+  }, [events, isModalOpen, isFormOpen]);
+  
   const calendarDays = getCalendarDays(currentDate);
   
   const handlePrevMonth = () => {
@@ -51,6 +59,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   };
   
   const handleEventClick = (event: Event) => {
+    console.log("Event clicked:", event);
     setSelectedEvent(event);
     setIsModalOpen(true);
     if (onEventClick) {
@@ -60,7 +69,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedEvent(null);
+    setTimeout(() => {
+      setSelectedEvent(null);
+    }, 300); // Add delay to prevent flickering
   };
 
   const handleAddEvent = (date?: Date) => {
@@ -70,11 +81,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const handleEditEvent = () => {
+    console.log("Edit event triggered", selectedEvent);
     if (!selectedEvent) return;
     
-    setEditingEvent(selectedEvent);
+    setEditingEvent({...selectedEvent});
     setIsModalOpen(false);
-    setIsFormOpen(true);
+    
+    // Ensure form opens after modal closes
+    setTimeout(() => {
+      setIsFormOpen(true);
+    }, 100);
   };
 
   const handleSaveEvent = (event: Event) => {
@@ -89,6 +105,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       }
       toast.success('Event created successfully');
     }
+    setIsFormOpen(false);
   };
 
   const handleDeleteEvent = (id: string) => {

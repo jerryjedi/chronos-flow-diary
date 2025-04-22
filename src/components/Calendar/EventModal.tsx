@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/data/mockData';
@@ -17,6 +17,19 @@ interface EventModalProps {
 }
 
 const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit, onDelete }) => {
+  if (!event) return null;
+  
+  // Parse date safely to prevent issues on different browsers
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'EEEE, MMMM d, yyyy');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -26,6 +39,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
             <div className="flex gap-2">
               {onEdit && (
                 <Button variant="outline" size="sm" onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   onEdit();
                 }}>
@@ -34,6 +48,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
               )}
               {onDelete && (
                 <Button variant="outline" size="sm" onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   if (window.confirm('Are you sure you want to delete this event?')) {
                     onDelete(event.id);
@@ -48,7 +63,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
         <div className="space-y-4 mt-2">
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              {format(parseISO(event.date), 'EEEE, MMMM d, yyyy')}
+              {formatDate(event.date)}
             </div>
             
             <div className="flex items-center gap-2">

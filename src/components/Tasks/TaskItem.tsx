@@ -13,13 +13,14 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClick }) => {
-  const handleToggle = () => {
+  const handleToggle = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
     onToggleComplete(task.id, !task.completed);
   };
 
   const handleRelatedEventClick = () => {
     if (onEventClick && task.relatedEventId) {
-      // 创建一个事件对象来显示任务详情
+      // Create an event object to show task details
       const taskEvent: Event = {
         id: task.id,
         title: task.title,
@@ -28,21 +29,22 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
         category: task.category,
         priority: task.priority
       };
+      console.log("Clicking related event:", taskEvent);
       onEventClick(taskEvent);
     }
   };
 
   return (
     <div 
-      className={`task-item ${task.completed ? 'bg-muted/30' : ''} cursor-pointer`}
+      className={`task-item p-3 border rounded-md mb-2 ${task.completed ? 'bg-muted/30' : ''} cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
       onClick={handleRelatedEventClick}
     >
       <div className="flex items-start gap-3">
         <Checkbox 
           checked={task.completed} 
-          onCheckedChange={handleToggle}
+          onCheckedChange={() => {}}
+          onClick={handleToggle}
           className="mt-1"
-          onClick={(e) => e.stopPropagation()}
         />
         
         <div className="flex-1">

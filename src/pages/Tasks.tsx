@@ -35,19 +35,27 @@ const Tasks = () => {
   };
 
   const handleEventClick = (event: Event) => {
+    console.log("Event clicked in Tasks view:", event);
     setSelectedEvent(event);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedEvent(null);
+    setTimeout(() => {
+      setSelectedEvent(null);
+    }, 300);
   };
 
   const handleEditEvent = () => {
+    console.log("Edit event triggered in Tasks view", selectedEvent);
     if (!selectedEvent) return;
+    
     setIsModalOpen(false);
-    setIsFormOpen(true);
+    // Ensure form opens after modal closes
+    setTimeout(() => {
+      setIsFormOpen(true);
+    }, 100);
   };
 
   const handleUpdateEvent = (updatedEvent: Event) => {
@@ -57,6 +65,7 @@ const Tasks = () => {
       )
     );
     toast.success('Event updated successfully');
+    setIsFormOpen(false);
   };
 
   const handleDeleteEvent = (id: string) => {
