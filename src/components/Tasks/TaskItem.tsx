@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Task } from '@/data/mockData';
+import { Task, Event } from '@/data/mockData';
 import PriorityBadge from '@/components/common/PriorityBadge';
 import CategoryLabel from '@/components/common/CategoryLabel';
 import TagBadge from '@/components/common/TagBadge';
@@ -9,20 +9,40 @@ import TagBadge from '@/components/common/TagBadge';
 interface TaskItemProps {
   task: Task;
   onToggleComplete: (taskId: string, completed: boolean) => void;
+  onEventClick?: (event: Event) => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClick }) => {
   const handleToggle = () => {
     onToggleComplete(task.id, !task.completed);
   };
 
+  const handleRelatedEventClick = () => {
+    if (onEventClick && task.relatedEventId) {
+      // 创建一个事件对象来显示任务详情
+      const taskEvent: Event = {
+        id: task.id,
+        title: task.title,
+        date: task.date,
+        description: task.description,
+        category: task.category,
+        priority: task.priority
+      };
+      onEventClick(taskEvent);
+    }
+  };
+
   return (
-    <div className={`task-item ${task.completed ? 'bg-muted/30' : ''}`}>
+    <div 
+      className={`task-item ${task.completed ? 'bg-muted/30' : ''} cursor-pointer`}
+      onClick={handleRelatedEventClick}
+    >
       <div className="flex items-start gap-3">
         <Checkbox 
           checked={task.completed} 
           onCheckedChange={handleToggle}
           className="mt-1"
+          onClick={(e) => e.stopPropagation()}
         />
         
         <div className="flex-1">

@@ -19,6 +19,7 @@ export interface Task {
   category?: string;
   tags?: string[];
   description?: string;
+  relatedEventId?: string; // 关联的事件ID
 }
 
 export type Category = {
@@ -98,7 +99,8 @@ export const mockTasks: Task[] = [
     completed: false,
     priority: 'high',
     category: 'work',
-    tags: ['project', 'urgent']
+    tags: ['project', 'urgent'],
+    relatedEventId: '1'
   },
   {
     id: '2',
@@ -107,7 +109,8 @@ export const mockTasks: Task[] = [
     completed: false,
     priority: 'medium',
     category: 'work',
-    tags: ['presentation']
+    tags: ['presentation'],
+    relatedEventId: '1'
   },
   {
     id: '3',

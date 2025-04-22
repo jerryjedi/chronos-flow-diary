@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { Task } from '@/data/mockData';
+import { Task, Event } from '@/data/mockData';
 import TaskItem from './TaskItem';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -9,9 +9,10 @@ interface TaskListProps {
   tasks: Task[];
   date: Date;
   onToggleComplete: (taskId: string, completed: boolean) => void;
+  onEventClick?: (event: Event) => void;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, date, onToggleComplete }) => {
+const TaskList: React.FC<TaskListProps> = ({ tasks, date, onToggleComplete, onEventClick }) => {
   const [filter, setFilter] = useState<string>('all');
   
   // Apply filters
@@ -49,7 +50,8 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, date, onToggleComplete }) =>
             <TaskItem 
               key={task.id} 
               task={task} 
-              onToggleComplete={onToggleComplete} 
+              onToggleComplete={onToggleComplete}
+              onEventClick={onEventClick}
             />
           ))
         ) : (

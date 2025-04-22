@@ -71,6 +71,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 
   const handleEditEvent = () => {
     if (!selectedEvent) return;
+    
     setEditingEvent(selectedEvent);
     setIsModalOpen(false);
     setIsFormOpen(true);
