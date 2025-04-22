@@ -9,7 +9,7 @@ import { Calendar, Edit, Trash2 } from 'lucide-react';
 import PriorityBadge from '@/components/common/PriorityBadge';
 
 interface EventModalProps {
-  event: Event;
+  event: Event | null;
   isOpen: boolean;
   onClose: () => void;
   onEdit?: () => void;
@@ -17,16 +17,15 @@ interface EventModalProps {
 }
 
 const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit, onDelete }) => {
-  // Ensure we don't render until we have an event object
-  if (!event) return null;
+  // Don't render if we don't have an event or if modal is not open
+  if (!event || !isOpen) return null;
   
-  // Parse date safely to prevent issues on different browsers
-  const formatDate = (dateString: string) => {
+  // Parse date safely for cross-browser compatibility
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    
     try {
-      // Ensure the date string format works in Safari/Edge
-      if (!dateString) return '';
-      
-      // Handle YYYY-MM-DD format explicitly for cross-browser support
+      // Handle YYYY-MM-DD format explicitly for Safari/Edge support
       let date;
       if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
         const [year, month, day] = dateString.split('-');
@@ -36,12 +35,13 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
       }
       
       if (isNaN(date.getTime())) {
+        console.log("Invalid date", dateString);
         return dateString;
       }
       
       return format(date, 'EEEE, MMMM d, yyyy');
     } catch (error) {
-      console.error('Error formatting date:', error);
+      console.error('Error formatting date:', error, dateString);
       return dateString || '';
     }
   };
@@ -57,10 +57,12 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onDelete) {
+    if (onDelete && event.id) {
       onDelete(event.id);
     }
   };
+
+  console.log("Rendering EventModal with event:", event, "isOpen:", isOpen);
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>

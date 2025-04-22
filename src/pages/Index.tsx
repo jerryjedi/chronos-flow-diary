@@ -7,11 +7,14 @@ import ImportCalendar from '@/components/FileImport/ImportCalendar';
 import { mockEvents, mockTasks, Event, Task } from '@/data/mockData';
 import { getTasksForDay } from '@/utils/calendarUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import EventModal from '@/components/Calendar/EventModal';
 
 const Index = () => {
   const [currentDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>(mockEvents);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Get tasks for today
   const todayTasks = getTasksForDay(tasks, currentDate);
@@ -44,6 +47,20 @@ const Index = () => {
     setEvents(prev => prev.filter(event => event.id !== eventId));
   };
 
+  const handleEventClick = (event: Event) => {
+    console.log("Event clicked in Index view:", event);
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Clear selected event after modal is closed
+    setTimeout(() => {
+      setSelectedEvent(null);
+    }, 300);
+  };
+
   return (
     <Layout>
       <div className="flex justify-between items-center mb-6">
@@ -62,6 +79,7 @@ const Index = () => {
               onEventAdd={handleAddEvent}
               onEventUpdate={handleUpdateEvent}
               onEventDelete={handleDeleteEvent}
+              onEventClick={handleEventClick}
             />
           </CardContent>
         </Card>
@@ -75,10 +93,19 @@ const Index = () => {
               tasks={todayTasks} 
               date={currentDate}
               onToggleComplete={handleToggleComplete} 
+              onEventClick={handleEventClick}
             />
           </CardContent>
         </Card>
       </div>
+
+      {/* Add Event Modal for handling task-related events */}
+      <EventModal 
+        event={selectedEvent}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        // No edit/delete as this is just for viewing
+      />
     </Layout>
   );
 };

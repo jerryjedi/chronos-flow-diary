@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format, addMonths, subMonths, setMonth, setYear } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
@@ -59,19 +58,31 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   };
   
   const handleEventClick = (event: Event) => {
-    console.log("Event clicked:", event);
-    setSelectedEvent(event);
-    setIsModalOpen(true);
+    console.log("Event clicked in CalendarView:", event);
+    
+    // If there's an external handler, use that
     if (onEventClick) {
       onEventClick(event);
+      return;
     }
+    
+    // Otherwise handle internally
+    setSelectedEvent(event);
+    setIsModalOpen(true);
   };
   
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    // Clear selected event after modal is closed
+    setTimeout(() => {
+      if (!isFormOpen) {
+        setSelectedEvent(null);
+      }
+    }, 300);
   };
 
   const handleAddEvent = (date?: Date) => {
+    console.log("Adding new event for date:", date);
     setFormDate(date);
     setEditingEvent(undefined);
     setIsFormOpen(true);
@@ -81,14 +92,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     console.log("Edit event triggered", selectedEvent);
     if (!selectedEvent) return;
     
-    // Important: close the modal first, then set editing event and open form
+    // Close the modal first
     setIsModalOpen(false);
+    
+    // Set up edit mode
     setEditingEvent({...selectedEvent});
     
-    // Ensure form opens after modal closes with a short delay
+    // Add delay to ensure the first modal is closed before opening the form
     setTimeout(() => {
       setIsFormOpen(true);
-    }, 100);
+    }, 300);
   };
 
   const handleSaveEvent = (event: Event) => {
@@ -106,9 +119,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       toast.success('Event created successfully');
     }
     
-    // Reset editing state after saving
+    // Close the form
     setIsFormOpen(false);
-    setEditingEvent(undefined);
+    
+    // Reset editing state after saving with a delay
+    setTimeout(() => {
+      setEditingEvent(undefined);
+      setSelectedEvent(null);
+    }, 300);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -116,12 +134,30 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       onEventDelete(id);
       toast.success('Event deleted successfully');
     }
+    
+    // Close modals
     handleCloseModal();
+    setIsFormOpen(false);
+    
+    // Reset state with delay
+    setTimeout(() => {
+      setEditingEvent(undefined);
+      setSelectedEvent(null);
+    }, 300);
   };
 
   // Generate year options (current year ± 10 years)
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
+  
+  // Debug
+  console.log("CalendarView state:", {
+    selectedEvent,
+    isModalOpen,
+    isFormOpen,
+    formDate,
+    editingEvent
+  });
 
   return (
     <div className="w-full">
@@ -219,15 +255,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         })}
       </div>
       
-      {/* Event Modal - Only show when isModalOpen is true and selectedEvent exists */}
-      {selectedEvent && (
-        <EventModal 
-          event={selectedEvent}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onEdit={handleEditEvent}
-          onDelete={handleDeleteEvent}
-        />
+      {!onEventClick && (
+        <>
+          {/* Event Modal - Only show when isModalOpen is true */}
+          <EventModal 
+            event={selectedEvent}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onEdit={handleEditEvent}
+            onDelete={handleDeleteEvent}
+          />
+        </>
       )}
 
       {/* Event Form - Only show when isFormOpen is true */}
@@ -237,7 +275,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         isOpen={isFormOpen} 
         onClose={() => {
           setIsFormOpen(false);
-          setEditingEvent(undefined);
+          // Clear editing state with delay
+          setTimeout(() => {
+            setEditingEvent(undefined);
+            if (!isModalOpen) {
+              setSelectedEvent(null);
+            }
+          }, 300);
         }}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}

@@ -23,7 +23,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
     e.stopPropagation();
     
     if (onEventClick && task.relatedEventId) {
-      // Create an event object to show task details
+      // Create a complete event object to show task details
       const taskEvent: Event = {
         id: task.relatedEventId,
         title: task.title,
@@ -32,7 +32,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
         category: task.category,
         priority: task.priority
       };
-      console.log("Clicking related event:", taskEvent);
+      
+      console.log("Clicking related event with data:", taskEvent);
       onEventClick(taskEvent);
     }
   };
@@ -80,6 +81,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
             
             {hasRelatedEvent && (
               <button 
+                type="button"
                 onClick={handleRelatedEventClick}
                 className="text-xs text-purple-500 font-medium hover:underline cursor-pointer"
               >
