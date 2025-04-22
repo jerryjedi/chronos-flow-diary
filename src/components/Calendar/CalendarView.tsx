@@ -95,6 +95,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       onEventDelete(id);
       toast.success('Event deleted successfully');
     }
+    handleCloseModal();
   };
 
   // Generate year options (current year ± 10 years)
@@ -203,6 +204,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onEdit={handleEditEvent}
+          onDelete={handleDeleteEvent}
         />
       )}
 

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Event } from '@/data/mockData';
 import CategoryLabel from '@/components/common/CategoryLabel';
-import { Edit } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import PriorityBadge from '@/components/common/PriorityBadge';
 
 interface EventModalProps {
@@ -13,23 +13,36 @@ interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit?: () => void;
+  onDelete?: (id: string) => void;
 }
 
-const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit }) => {
+const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit, onDelete }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex justify-between items-center">
             <DialogTitle className="text-xl">{event.title}</DialogTitle>
-            {onEdit && (
-              <Button variant="outline" size="sm" onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}>
-                <Edit className="h-4 w-4 mr-1" /> Edit
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {onEdit && (
+                <Button variant="outline" size="sm" onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}>
+                  <Edit className="h-4 w-4 mr-1" /> Edit
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="outline" size="sm" onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm('Are you sure you want to delete this event?')) {
+                    onDelete(event.id);
+                  }
+                }} className="text-destructive hover:text-destructive">
+                  <Trash2 className="h-4 w-4 mr-1" /> Delete
+                </Button>
+              )}
+            </div>
           </div>
         </DialogHeader>
         <div className="space-y-4 mt-2">
@@ -62,7 +75,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit 
           
           {event.description && (
             <div className="pt-2 border-t">
-              <div className="text-sm">{event.description}</div>
+              <div className="text-sm whitespace-pre-line">{event.description}</div>
             </div>
           )}
         </div>
