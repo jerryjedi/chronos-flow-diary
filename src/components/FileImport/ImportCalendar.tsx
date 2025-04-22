@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Calendar, Upload } from 'lucide-react';
@@ -15,6 +15,7 @@ const ImportCalendar: React.FC<ImportCalendarProps> = ({ onImport }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -39,10 +40,18 @@ const ImportCalendar: React.FC<ImportCalendarProps> = ({ onImport }) => {
       onImport(importedEvents);
       toast.success(`Successfully imported ${importedEvents.length} events`);
       setIsDialogOpen(false);
+      // Reset after import
+      setFileContent(null);
+      setFileName('');
     } catch (error) {
       console.error('Error importing calendar:', error);
       toast.error('Failed to import calendar. Please check the file format.');
     }
+  };
+
+  const handleSelectFileClick = () => {
+    // Programmatically click the hidden file input
+    fileInputRef.current?.click();
   };
 
   return (
@@ -56,7 +65,14 @@ const ImportCalendar: React.FC<ImportCalendarProps> = ({ onImport }) => {
         <span>Import Calendar</span>
       </Button>
       
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          // Reset when dialog is closed
+          setFileContent(null);
+          setFileName('');
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Import Calendar</DialogTitle>
@@ -75,17 +91,23 @@ const ImportCalendar: React.FC<ImportCalendarProps> = ({ onImport }) => {
                 </p>
               </div>
               
-              <label className="mt-4 cursor-pointer">
-                <input
-                  type="file"
-                  accept=".ics"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <Button variant="outline" type="button" size="sm">
-                  Select File
-                </Button>
-              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".ics"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              
+              <Button 
+                variant="outline" 
+                type="button" 
+                size="sm"
+                onClick={handleSelectFileClick}
+                className="mt-4"
+              >
+                Select File
+              </Button>
               
               {fileName && (
                 <p className="mt-2 text-sm">{fileName}</p>
