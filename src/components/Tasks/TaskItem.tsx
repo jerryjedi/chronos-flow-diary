@@ -30,7 +30,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
         date: task.date,
         description: task.description,
         category: task.category,
-        color: task.color,
+        // Remove color if it doesn't exist in the Task type
         priority: task.priority
       };
       
