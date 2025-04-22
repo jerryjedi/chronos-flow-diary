@@ -18,7 +18,10 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
     onToggleComplete(task.id, !task.completed);
   };
 
-  const handleRelatedEventClick = () => {
+  const handleRelatedEventClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (onEventClick && task.relatedEventId) {
       // Create an event object to show task details
       const taskEvent: Event = {
@@ -38,8 +41,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
 
   return (
     <div 
-      className={`task-item p-3 border rounded-md mb-2 ${task.completed ? 'bg-muted/30' : ''} ${hasRelatedEvent ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} transition-colors`}
-      onClick={hasRelatedEvent ? handleRelatedEventClick : undefined}
+      className={`task-item p-3 border rounded-md mb-2 ${task.completed ? 'bg-muted/30' : ''} transition-colors`}
     >
       <div className="flex items-start gap-3">
         <Checkbox 
@@ -77,9 +79,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
             )}
             
             {hasRelatedEvent && (
-              <span className="text-xs text-purple-500 font-medium">
+              <button 
+                onClick={handleRelatedEventClick}
+                className="text-xs text-purple-500 font-medium hover:underline cursor-pointer"
+              >
                 Has linked event
-              </span>
+              </button>
             )}
           </div>
         </div>

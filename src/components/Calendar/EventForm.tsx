@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Event, Category } from '@/data/mockData';
 import { toast } from 'sonner';
+import { Calendar } from 'lucide-react';
 
 interface EventFormProps {
   event?: Event;
@@ -132,11 +133,14 @@ const EventForm: React.FC<EventFormProps> = ({
   if (!isOpen) return null;
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Event' : 'Add Event'}</DialogTitle>
-        </DialogHeader>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            {isEditMode ? 'Edit Event' : 'Add Event'}
+          </AlertDialogTitle>
+        </AlertDialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
@@ -227,7 +231,7 @@ const EventForm: React.FC<EventFormProps> = ({
             />
           </div>
           
-          <DialogFooter className="gap-2 sm:gap-0">
+          <AlertDialogFooter className="gap-2 sm:gap-0">
             {isEditMode && onDelete && (
               <Button 
                 type="button" 
@@ -243,16 +247,18 @@ const EventForm: React.FC<EventFormProps> = ({
                 Delete
               </Button>
             )}
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+            <AlertDialogCancel asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </AlertDialogCancel>
             <Button type="submit">
               {isEditMode ? 'Update' : 'Create'}
             </Button>
-          </DialogFooter>
+          </AlertDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

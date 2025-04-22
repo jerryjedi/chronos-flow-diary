@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/data/mockData';
 import CategoryLabel from '@/components/common/CategoryLabel';
-import { Edit, Trash2 } from 'lucide-react';
+import { Calendar, Edit, Trash2 } from 'lucide-react';
 import PriorityBadge from '@/components/common/PriorityBadge';
 
 interface EventModalProps {
@@ -18,7 +18,7 @@ interface EventModalProps {
 
 const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit, onDelete }) => {
   // Ensure we don't render until we have an event object
-  if (!event || !isOpen) return null;
+  if (!event) return null;
   
   // Parse date safely to prevent issues on different browsers
   const formatDate = (dateString: string) => {
@@ -46,40 +46,34 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
     }
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onEdit) {
+      onEdit();
+    }
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(event.id);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl">{event.title || 'Event'}</DialogTitle>
-            <div className="flex gap-2">
-              {onEdit && (
-                <Button variant="outline" size="sm" onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onEdit();
-                }}>
-                  <Edit className="h-4 w-4 mr-1" /> Edit
-                </Button>
-              )}
-              {onDelete && (
-                <Button variant="outline" size="sm" onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  // Use AlertDialog instead of window.confirm
-                  if (window.confirm('Are you sure you want to delete this event?')) {
-                    onDelete(event.id);
-                  }
-                }} className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4 mr-1" /> Delete
-                </Button>
-              )}
-            </div>
-          </div>
-        </DialogHeader>
-        <div className="space-y-4 mt-2">
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-xl flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            {event.title || 'Event'}
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <div className="space-y-4 py-2">
           <div className="flex items-center justify-between">
-            <div className="text-sm">
+            <div className="text-sm font-medium">
               {formatDate(event.date)}
             </div>
             
@@ -111,8 +105,32 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+        <AlertDialogFooter className="gap-2">
+          {onDelete && (
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={handleDelete}
+              className="mr-auto"
+            >
+              <Trash2 className="h-4 w-4 mr-1" /> Delete
+            </Button>
+          )}
+          {onEdit && (
+            <AlertDialogAction asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleEdit}
+              >
+                <Edit className="h-4 w-4 mr-1" /> Edit
+              </Button>
+            </AlertDialogAction>
+          )}
+          <AlertDialogCancel>Close</AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
