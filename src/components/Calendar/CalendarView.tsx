@@ -69,9 +69,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setTimeout(() => {
-      setSelectedEvent(null);
-    }, 300); // Add delay to prevent flickering
   };
 
   const handleAddEvent = (date?: Date) => {
@@ -84,16 +81,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     console.log("Edit event triggered", selectedEvent);
     if (!selectedEvent) return;
     
-    setEditingEvent({...selectedEvent});
+    // Important: close the modal first, then set editing event and open form
     setIsModalOpen(false);
+    setEditingEvent({...selectedEvent});
     
-    // Ensure form opens after modal closes
+    // Ensure form opens after modal closes with a short delay
     setTimeout(() => {
       setIsFormOpen(true);
     }, 100);
   };
 
   const handleSaveEvent = (event: Event) => {
+    console.log("Saving event:", event, "Editing mode:", !!editingEvent);
+    
     if (editingEvent) {
       if (onEventUpdate) {
         onEventUpdate(event);
@@ -105,7 +105,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       }
       toast.success('Event created successfully');
     }
+    
+    // Reset editing state after saving
     setIsFormOpen(false);
+    setEditingEvent(undefined);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -216,6 +219,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         })}
       </div>
       
+      {/* Event Modal - Only show when isModalOpen is true and selectedEvent exists */}
       {selectedEvent && (
         <EventModal 
           event={selectedEvent}
@@ -226,11 +230,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         />
       )}
 
+      {/* Event Form - Only show when isFormOpen is true */}
       <EventForm 
         event={editingEvent} 
         date={formDate}
         isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingEvent(undefined);
+        }}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
         categories={mockCategories}

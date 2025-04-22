@@ -22,7 +22,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
     if (onEventClick && task.relatedEventId) {
       // Create an event object to show task details
       const taskEvent: Event = {
-        id: task.id,
+        id: task.relatedEventId,
         title: task.title,
         date: task.date,
         description: task.description,
@@ -34,10 +34,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
     }
   };
 
+  const hasRelatedEvent = !!task.relatedEventId;
+
   return (
     <div 
-      className={`task-item p-3 border rounded-md mb-2 ${task.completed ? 'bg-muted/30' : ''} cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
-      onClick={handleRelatedEventClick}
+      className={`task-item p-3 border rounded-md mb-2 ${task.completed ? 'bg-muted/30' : ''} ${hasRelatedEvent ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : ''} transition-colors`}
+      onClick={hasRelatedEvent ? handleRelatedEventClick : undefined}
     >
       <div className="flex items-start gap-3">
         <Checkbox 
@@ -72,6 +74,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggleComplete, onEventClic
                   <TagBadge key={tag} tag={tag} />
                 ))}
               </div>
+            )}
+            
+            {hasRelatedEvent && (
+              <span className="text-xs text-purple-500 font-medium">
+                Has linked event
+              </span>
             )}
           </div>
         </div>

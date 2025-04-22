@@ -42,9 +42,6 @@ const Tasks = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setTimeout(() => {
-      setSelectedEvent(null);
-    }, 300);
   };
 
   const handleEditEvent = () => {
@@ -52,6 +49,7 @@ const Tasks = () => {
     if (!selectedEvent) return;
     
     setIsModalOpen(false);
+    
     // Ensure form opens after modal closes
     setTimeout(() => {
       setIsFormOpen(true);
@@ -59,6 +57,7 @@ const Tasks = () => {
   };
 
   const handleUpdateEvent = (updatedEvent: Event) => {
+    console.log("Updating event in Tasks view:", updatedEvent);
     setEvents(prev => 
       prev.map(event => 
         event.id === updatedEvent.id ? updatedEvent : event
@@ -108,7 +107,10 @@ const Tasks = () => {
         <EventForm 
           event={selectedEvent} 
           isOpen={isFormOpen} 
-          onClose={() => setIsFormOpen(false)}
+          onClose={() => {
+            setIsFormOpen(false);
+            setSelectedEvent(prev => ({...prev} as Event)); // Maintain the event for potential reopening
+          }}
           onSave={handleUpdateEvent}
           onDelete={handleDeleteEvent}
           categories={mockCategories}

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Event, Category, mockCategories } from '@/data/mockData';
+import { Event, Category } from '@/data/mockData';
+import { toast } from 'sonner';
 
 interface EventFormProps {
   event?: Event;
@@ -30,7 +31,31 @@ const EventForm: React.FC<EventFormProps> = ({
   categories
 }) => {
   const isEditMode = !!event;
-  const initialDate = event ? event.date : date ? format(date, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
+  
+  // Format the initialDate for cross-browser compatibility
+  const getFormattedDate = (inputDate?: Date | string): string => {
+    if (!inputDate) return format(new Date(), 'yyyy-MM-dd');
+    
+    try {
+      if (typeof inputDate === 'string') {
+        // Handle YYYY-MM-DD format
+        if (inputDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          return inputDate;
+        }
+        // Try to parse other string formats
+        const parsedDate = new Date(inputDate);
+        return format(parsedDate, 'yyyy-MM-dd');
+      } else {
+        // It's a Date object
+        return format(inputDate, 'yyyy-MM-dd');
+      }
+    } catch (e) {
+      console.error("Date parsing error:", e);
+      return format(new Date(), 'yyyy-MM-dd');
+    }
+  };
+  
+  const initialDate = event ? getFormattedDate(event.date) : date ? getFormattedDate(date) : getFormattedDate(new Date());
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -40,19 +65,22 @@ const EventForm: React.FC<EventFormProps> = ({
   const [category, setCategory] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   
+  // Reset form when dialog opens/closes or when event/date changes
   useEffect(() => {
-    if (event) {
-      setTitle(event.title || '');
-      setDescription(event.description || '');
-      setEventDate(event.date);
-      setStartTime(event.startTime || '');
-      setEndTime(event.endTime || '');
-      setCategory(event.category || '');
-      setPriority((event.priority as 'low' | 'medium' | 'high') || 'medium');
-    } else {
-      resetForm();
-      if (date) {
-        setEventDate(format(date, 'yyyy-MM-dd'));
+    if (isOpen) {
+      if (event) {
+        setTitle(event.title || '');
+        setDescription(event.description || '');
+        setEventDate(getFormattedDate(event.date));
+        setStartTime(event.startTime || '');
+        setEndTime(event.endTime || '');
+        setCategory(event.category || '');
+        setPriority((event.priority as 'low' | 'medium' | 'high') || 'medium');
+      } else {
+        resetForm();
+        if (date) {
+          setEventDate(getFormattedDate(date));
+        }
       }
     }
   }, [event, date, isOpen]);
@@ -67,15 +95,26 @@ const EventForm: React.FC<EventFormProps> = ({
     setPriority('medium');
   };
   
+  // Handle form submission with proper validation
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    
+    if (!eventDate) {
+      toast.error("Date is required");
+      return;
+    }
     
     const categoryObj = categories.find(c => c.name === category);
     
     const updatedEvent: Event = {
       id: event?.id || crypto.randomUUID(),
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim() || undefined,
       date: eventDate,
       startTime: startTime || undefined,
       endTime: endTime || undefined,
@@ -84,9 +123,13 @@ const EventForm: React.FC<EventFormProps> = ({
       priority
     };
     
+    console.log("Saving event:", updatedEvent);
     onSave(updatedEvent);
     onClose();
   };
+  
+  // Don't render if not open
+  if (!isOpen) return null;
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

@@ -17,16 +17,32 @@ interface EventModalProps {
 }
 
 const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit, onDelete }) => {
-  if (!event) return null;
+  // Ensure we don't render until we have an event object
+  if (!event || !isOpen) return null;
   
   // Parse date safely to prevent issues on different browsers
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
+      // Ensure the date string format works in Safari/Edge
+      if (!dateString) return '';
+      
+      // Handle YYYY-MM-DD format explicitly for cross-browser support
+      let date;
+      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = dateString.split('-');
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        date = new Date(dateString);
+      }
+      
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+      
       return format(date, 'EEEE, MMMM d, yyyy');
     } catch (error) {
       console.error('Error formatting date:', error);
-      return dateString;
+      return dateString || '';
     }
   };
 
@@ -35,7 +51,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl">{event.title}</DialogTitle>
+            <DialogTitle className="text-xl">{event.title || 'Event'}</DialogTitle>
             <div className="flex gap-2">
               {onEdit && (
                 <Button variant="outline" size="sm" onClick={(e) => {
@@ -50,6 +66,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose, onEdit,
                 <Button variant="outline" size="sm" onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  // Use AlertDialog instead of window.confirm
                   if (window.confirm('Are you sure you want to delete this event?')) {
                     onDelete(event.id);
                   }
